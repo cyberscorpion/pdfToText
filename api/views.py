@@ -158,21 +158,39 @@ class GET_APIView(APIView):
     
 
     
+import csv
     
-    
-    
-    
+try:
+    import urllib.request as urllib2
+except ImportError:
+    import urllib2
+import urllib.request
+import codecs
 warnings.simplefilter("error")
 
 users = 20
 items = 10
 req_sim=0
 def readingFile(filename):
-    f = open(filename,"r")
+#    response = requests.get('https://raw.githubusercontent.com/rajatjain1998/pdfToText/master/ratings.csv')
     data=[]
-    for row in f:
-        r = row.split(',')
-        e = [ int(r[0]) , int(r[1]) , int(r[2]) ]
+#    with io.BytesIO(response.content) as f:
+    url = 'https://raw.githubusercontent.com/rajatjain1998/pdfToText/master/ratings.csv'
+    
+
+    ftpstream = urllib.request.urlopen(url)
+    csvfile = csv.reader(codecs.iterdecode(ftpstream, 'utf-8'))
+    
+#    response = urllib2.urlopen(url)
+#    f = open(filename,"r")
+#    f = csv.reader(response)
+#    f = [row for row in csvfile]
+    for row in csvfile:
+#        print(line)
+#    for row in f:
+#        print(row)
+#        r = row.split(',')
+        e = [ int(row[0]) , int(row[1]) , int(row[2]) ]
         data.append(e)
     return data
 
@@ -298,21 +316,21 @@ def crossValidation(data):
 
     return Mat , sim_mat_user
 
-def predictRating(recommend_data,user_id,toBeRelated):
+def predictRating(recommend_data,user_id,skills):
 
     data , sim_user = crossValidation(recommend_data)
 
     #f = open(sys.argv[2] , "r")
 #    f = open("toBeRated.csv","r")
-#    toBeRelated =np.zeros((items),dtype=np.float64)
+    toBeRelated =np.zeros((items),dtype=np.float64)
 #    user_id = 0
 #    ct=0
-#    for row in f:
+    for x in skills:
 #        if ct>0:
 #            print (row)
 #            r = row.split(',')
 #            x = int(r[1][0])
-#            toBeRelated[x] = 1.0
+            toBeRelated[x-1] = 1.0
 #            user = int(r[0][1:3])
 #        ct = ct+1
 #    f.close()
@@ -366,9 +384,11 @@ def predictRating(recommend_data,user_id,toBeRelated):
     print (job)
     
     print ("Companies you can apply for :: ")   
+    result_job=[]
     for i in l:
-        print (job[i])  
-    return (job)
+        result_job.append(job[i])
+#        print (job[i])  
+    return (result_job)
 
 
 #recommend_data = readingFile(sys.argv[1])
@@ -378,11 +398,13 @@ class job_APIView(APIView):
     def post(self, request, format=None):
         user_id=request.POST.get('user_id')
         skills=request.POST.get('skills')
-        skills=list(map(float,skills.split(',')))
+        skills=list(map(int,skills.split(',')))
         
         
         recommend_data = readingFile("ratings.csv")
-        Response(predictRating(recommend_data,user_id,skills))
+#        return Response(recommend_data)
+        
+        return Response({'data':predictRating(recommend_data,user_id,skills)})
         
         
 class abc(APIView):
