@@ -1,0 +1,5 @@
+source bin/activate		(vir)
+
+python manage.py runserver	(pdfToText)
+
+./ngrok http 8000		(pdfToText)  (next t)
