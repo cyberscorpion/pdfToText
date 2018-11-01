@@ -190,7 +190,8 @@ def readingFile(filename):
 #    for row in f:
 #        print(row)
 #        r = row.split(',')
-        e = [ int(row[0]) , int(row[1]) , int(row[2]) ]
+        r = row.split(',')
+        e = [ int(r[0].strip(' " '))%7292024814 , int(r[1]) , int(r[2]) ]
         data.append(e)
     return data
 
@@ -376,20 +377,54 @@ def predictRating(recommend_data,user_id,skills):
     l = user_similarity.argsort()[-5:][::-1]
     for i in l:
         print (i+1)
-    f = open("user_job.csv","r")
+    f = open("user_job_new.csv","r")
     job = []
     for row in f:
-        job.append(row.split(','))
+        a=row.split(',')
+        a[0]=a[0][1:]
+        a[len(a)-1]=a[len(a)-1][:-2]
+        job.append(a)
     fw_w.close()
+    f.close()
     print (job)
     
-    print ("Companies you can apply for :: ")   
-    result_job=[]
+    company = []
+    print("Companies you can apply for :: ")
     for i in l:
-        result_job.append(job[i])
-#        print (job[i])  
-    return (result_job)
+        ct=0
+        for j in job[i]:
+            if ct>0:
+                print(j.rstrip(' " '))
+                company.append(j)
+            ct=1
+    print(company)
+    company_list = []
+    f = open("company.csv","r")
+    for row in f:
+        a = row.split(',')
+        a[len(a)-1]=a[len(a)-1][:-1]
+        company_list.append(a)
+    f.close()
+    print("Company database ::: ")
+    print(company_list)
 
+    candidate_skill = []
+    for i in range(len(toBeRelated)):
+        if toBeRelated[i]>0:
+            candidate_skill.append(i)
+
+    print("Candidate's skill : ", candidate_skill)
+    vacancy = []
+    for c in company_list:
+        if c[1] in company:
+            skill = c[2:]
+            print("skills required in ",c[1],' = ', skill)
+            for i in candidate_skill:
+                print("i = ",i)
+                if str(i) in skill and not str(i) in vacancy:
+                    print("*i = ",i)
+                    vacancy.append(str(i))
+    return(vacancy)
 
 #recommend_data = readingFile(sys.argv[1])
 class job_APIView(APIView):
